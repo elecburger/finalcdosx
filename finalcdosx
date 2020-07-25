@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# This script runs FinalCD on OSX using Wine.app.
+# Author: Thomas Eberger
+# Last revised: 2013-08-28
+
+fcdargsdefault="/32 /f1 /d0" #Default settings used for FinalCD
+
+usage()
+{
+cat << EOF
+usage: $0 
+
+This script runs FinalCD on OSX using Wine.app. Dialogs will be shown to select settings and source file.
+
+To install:
+- Download FinalCD from http://www.sonicillusions.co.uk/downloads.htm
+- Unzip FinalCD to a folder somewhere.
+- Download Wine.app from http://winebottler.kronenberg.org/downloads
+- Drag Wine.app to Applications, or to the FinalCD folder.
+- Place this script in the FinalCD folder
+
+EOF
+}
+
+scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" #Get the directory of the script. This is where finalcd.exe should be too.
+fcdpath="$scriptdir/finalcd.exe"
+
+#Check if finalcd.exe exists
+if [ -f "$fcdpath" ]; then 
+    echo "finalcd.exe exists"
+else
+    echo "finalcd.exe is missing!"
+    usage
+    exit
+fi
+
+#Check if Wine.app exists
+if [ -f "$scriptdir/Wine.app/Contents/Resources/bin/wine" ]; then
+    echo "Wine.app found in $scriptdir"
+    winepath="$scriptdir/Wine.app/Contents/Resources/bin/wine"
+elif [ -f "/Applications/Wine.app/Contents/Resources/bin/wine" ]; then
+    echo "Wine.app found in /Applications"
+    winepath="/Applications/Wine.app/Contents/Resources/bin/wine"
+else
+    echo "Wine.app is missing!"
+    usage
+    exit
+fi
+
+echo "Showing dialog..."
+
+#Show dialogs using Applescript
+fcdargs=$(osascript <<-'EOF'
+tell application "System Events"
+  activate
+  return choose from list {"/32 /f0 /d0", "/32 /f1 /d0", "/f0 /d1", "/f1 /d1"} with prompt "Select FinalCD settings"
+end tell
+EOF
+)
+
+source=$(osascript <<-'EOF'
+tell application "System Events"
+  activate
+  return POSIX path of (choose file with prompt "Open file to be resampled")
+end tell
+EOF
+)
+
+if [ -z "$source" ]; then
+    echo "No source file selected.\nAborted."
+    exit
+fi
+if [ "$fcdargs" = "false" ]; then
+    echo "Using default options: $fcdargsdefault"
+    fcdargs="$fcdargsdefault"
+fi
+
+sourcefile=$(basename "$source")
+sourcedir=`cd "$(dirname "$source")"; pwd`
+
+cd "$sourcedir"
+
+echo "Attempting to run finalcd.exe..."
+
+"$winepath" "$fcdpath" $fcdargs "$sourcefile"

@@ -2,7 +2,7 @@
 
 [FinalCD](http://www.sonicillusions.co.uk/finalcd.htm) is a sample rate converter made by [Sonic Illusions](http://www.sonicillusions.co.uk). It has gained some popularity among mastering engineers due to its very high quality filtering. 
 
-[Finalcdosx](https://www.electronicburger.com/software/finalcdosx/finalcdosx_0.2.0.zip) provides a way to run FinalCD using [Wine.app](https://winebottler.kronenberg.org/specifications), which is a pre-built, self-contained Wine distribution for Mac. It's normally a part of [Winebottler](https://winebottler.kronenberg.org/), but for this specific use, all we need is Wine.app.
+[Finalcdosx](https://www.electronicburger.com/software/finalcdosx/) provides a way to run FinalCD using [Wine.app](https://winebottler.kronenberg.org/specifications), which is a pre-built, self-contained Wine distribution for Mac. It's normally a part of [Winebottler](https://winebottler.kronenberg.org/), but for this specific use, all we need is Wine.app.
 
 The script also provides a (very) basic GUI to select the file to convert and to set the filter parameters.
 
@@ -20,6 +20,8 @@ MacOS 10.15 (Catalina) and above will not work at all due to Wine not supporting
 7. Run the script "finalcdosx" by double-clicking it in Finder, or run it from the terminal.
 
 ## Usage
+
+See [this blogpost](https://www.electronicburger.com/blog/finalcdosx-finalcd-on-mac/) for more detailed instructions.
 
 When the script is run, it will first check that finalcd.exe and Wine.app is present, and show an error and exit if either is missing. 
 

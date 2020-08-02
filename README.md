@@ -2,7 +2,7 @@
 
 [FinalCD](http://www.sonicillusions.co.uk/finalcd.htm) is a sample rate converter made by [Sonic Illusions](http://www.sonicillusions.co.uk). It has gained some popularity among mastering engineers due to its very high quality filtering. 
 
-[Finalcdosx](https://www.electronicburger.com/software/finalcdosx/) provides a way to run FinalCD using [Wine.app](https://winebottler.kronenberg.org/specifications), which is a pre-built, self-contained Wine distribution for Mac. It's normally a part of [Winebottler](https://winebottler.kronenberg.org/), but for this specific use, all we need is Wine.app.
+[Finalcdosx](https://www.electronicburger.com/software/finalcdosx/) provides a way to run FinalCD, which is Windows only, on Mac using [Wine.app](https://winebottler.kronenberg.org/specifications), which is a pre-built, self-contained Wine distribution for Mac. It's normally a part of [Winebottler](https://winebottler.kronenberg.org/), but for this specific use, all we need is Wine.app.
 
 The script also provides a (very) basic GUI to select the file to convert and to set the filter parameters.
 
@@ -31,9 +31,7 @@ After that, you can select which filter to use. Again, check the FinalCD docs fo
 
 Then select the output bit depth and whether or not dither should be applied. 
 
-In the next dialog, you can manually edit the parameters sent to FinalCD. This is useful if you want to use any of the additional features of FinalCD that isn't supported by this script, like 88.2 kHz output. See the FinalCD documentation for more info.
-
-In the normal case you'd just press OK without changing anything.
+In the next dialog, you can manually edit the parameters sent to FinalCD. This is useful if you want to use any of the additional features of FinalCD that isn't supported by this script, like 88.2 kHz output. See the FinalCD documentation for more info. In the normal case you'd just press OK without changing anything.
 
 The script will now attempt to run FinalCD, and will save the converted file at the same location as the original, with the same name but with "f_" prefixed.
 

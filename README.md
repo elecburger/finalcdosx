@@ -16,7 +16,7 @@ MacOS 10.15 (Catalina) and above will not work at all due to Wine not supporting
 2. Drag Wine.app to Applications.
 3. Download FinalCD from http://www.sonicillusions.co.uk/downloads.htm
 4. Unzip FinalCD to a folder somewhere.
-5. Download the finalcdosx script [here](https://www.electronicburger.com/software/finalcdosx/finalcdosx_0.2.0.zip), save it to the FinalCD folder, and unzip it.
+5. Download the finalcdosx script [here](https://www.electronicburger.com/software/finalcdosx/), save it to the FinalCD folder, and unzip it.
 7. Run the script "finalcdosx" by double-clicking it in Finder, or run it from the terminal.
 
 ## Usage

@@ -1,64 +1,61 @@
-#!/bin/sh
+#!/bin/bash
 
+# Name: finalcdosx
+# Version: 0.2.0
+# Web: https://www.electronicburger.com/software/finalcdosx/
+# GitHub: https://github.com/elecburger/finalcdosx
+# License: GPL v3
+# No warranties, use at your own risk.
+#
 # This script runs FinalCD on OSX using Wine.app.
-# Author: Thomas Eberger
-# Last revised: 2013-08-28
-
-fcdargsdefault="/32 /f1 /d0" #Default settings used for FinalCD
-
-usage()
-{
-cat << EOF
-usage: $0 
-
-This script runs FinalCD on OSX using Wine.app. Dialogs will be shown to select settings and source file.
-
-To install:
-- Download FinalCD from http://www.sonicillusions.co.uk/downloads.htm
-- Unzip FinalCD to a folder somewhere.
-- Download Wine.app from http://winebottler.kronenberg.org/downloads
-- Drag Wine.app to Applications, or to the FinalCD folder.
-- Place this script in the FinalCD folder
-
-EOF
-}
+# Tested with FinalCD v0.27, Wine.app v1.8.6, on Mac OSX v10.11.6
+# To install:
+# - Download FinalCD from http://www.sonicillusions.co.uk/downloads.htm
+# - Unzip FinalCD to a folder somewhere.
+# - Download Wine.app from http://winebottler.kronenberg.org/downloads
+# - Drag Wine.app to /Applications, or to the FinalCD folder.
+# - Place this script in the FinalCD folder and run it, either by double-clicking it in Finder, or from a terminal.
 
 scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" #Get the directory of the script. This is where finalcd.exe should be too.
 fcdpath="$scriptdir/finalcd.exe"
 
 #Check if finalcd.exe exists
 if [ -f "$fcdpath" ]; then 
-    echo "finalcd.exe exists"
+  echo "finalcd.exe exists"
 else
-    echo "finalcd.exe is missing!"
-    usage
-    exit
+  tmp=$(osascript <<-'EOF'
+  tell application "System Events"
+    activate
+    return display alert "Error - finalcd.exe is missing!" ¬
+      message "See instructions at:\n\nhttps://www.electronicburger.com/software/finalcdosx/"
+  end tell
+  EOF
+  )
+  exit
 fi
 
 #Check if Wine.app exists
 if [ -f "$scriptdir/Wine.app/Contents/Resources/bin/wine" ]; then
-    echo "Wine.app found in $scriptdir"
-    winepath="$scriptdir/Wine.app/Contents/Resources/bin/wine"
+  echo "Wine.app found in $scriptdir"
+  winepath="$scriptdir/Wine.app/Contents/Resources/bin/wine"
 elif [ -f "/Applications/Wine.app/Contents/Resources/bin/wine" ]; then
-    echo "Wine.app found in /Applications"
-    winepath="/Applications/Wine.app/Contents/Resources/bin/wine"
+  echo "Wine.app found in /Applications"
+  winepath="/Applications/Wine.app/Contents/Resources/bin/wine"
 else
-    echo "Wine.app is missing!"
-    usage
-    exit
+  tmp=$(osascript <<-'EOF'
+  tell application "System Events"
+    activate
+    return display alert "Error - Wine.app is missing!" ¬
+      message "See instructions at:\n\nhttps://www.electronicburger.com/software/finalcdosx/"
+  end tell
+  EOF
+  )
+  exit
 fi
 
-echo "Showing dialog..."
+echo "Showing dialogs..."
 
 #Show dialogs using Applescript
-fcdargs=$(osascript <<-'EOF'
-tell application "System Events"
-  activate
-  return choose from list {"/32 /f0 /d0", "/32 /f1 /d0", "/f0 /d1", "/f1 /d1"} with prompt "Select FinalCD settings"
-end tell
-EOF
-)
-
 source=$(osascript <<-'EOF'
 tell application "System Events"
   activate
@@ -68,12 +65,8 @@ EOF
 )
 
 if [ -z "$source" ]; then
-    echo "No source file selected.\nAborted."
-    exit
-fi
-if [ "$fcdargs" = "false" ]; then
-    echo "Using default options: $fcdargsdefault"
-    fcdargs="$fcdargsdefault"
+  echo "No source file selected, canceled."
+  exit
 fi
 
 sourcefile=$(basename "$source")
@@ -81,6 +74,72 @@ sourcedir=`cd "$(dirname "$source")"; pwd`
 
 cd "$sourcedir"
 
+filterargs=$(osascript <<-'EOF'
+  tell application "System Events"
+    activate
+    return choose from list { ¬
+        "/f0 - Sharp", ¬
+        "/f1 - Gentle", ¬
+        "/f2 - Medium" ¬
+      } ¬
+      with prompt "Select filter type" ¬
+      default items {"/f0 - Sharp"}
+  end tell
+EOF 
+)
+
+if [ "$filterargs" = "false" ]; then
+  echo "Canceled."
+  exit
+else
+  filterargs=${filterargs:0:3}
+fi
+
+outfmtargs=$(osascript <<-'EOF'
+  tell application "System Events"
+    activate
+    return choose from list { ¬
+        "/32 /d0 - 32 bit (integer)", ¬
+        "/24 /d0 - 24 bit, No dither", ¬
+        "/24 /d1 - 24 bit, With dither", ¬
+        "/16 /d0 - 16 bit, No dither", ¬
+        "/16 /d1 - 16 bit, With dither" ¬
+      } ¬
+      with prompt "Select output bit depth" ¬
+      default items {"/24 /d1 - 24 bit, With dither"}
+  end tell
+EOF
+)
+
+if [ "$outfmtargs" = "false" ]; then
+  echo "Canceled."
+  exit
+else
+  outfmtargs=${outfmtargs:0:7}
+fi
+
+fcdargs=$(osascript -e "
+  tell application \"System Events\"
+    activate
+    try
+      set dialogText to text returned of ( ¬
+        display dialog \"Modify parameters (optional) and press OK to continue.\" ¬
+        default answer \"$filterargs $outfmtargs\" ¬
+      )
+    on error number -128
+      set dialogText to \"--exit--\"
+    end try
+    return dialogText
+  end tell
+" )
+
+if [ "$fcdargs" = "--exit--" ]; then
+  echo "Canceled."
+  exit
+fi
+
 echo "Attempting to run finalcd.exe..."
 
 "$winepath" "$fcdpath" $fcdargs "$sourcefile"
+
+read -p "Script finished. Press ENTER to exit..."
